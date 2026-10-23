@@ -5,12 +5,12 @@ import { Path } from 'src/dnd/types';
 import { defaultSort } from 'src/helpers/util';
 import { t } from 'src/lang/helpers';
 import { lableToName } from 'src/parsers/helpers/inlineMetadata';
+import { getNumericPointValue } from 'src/parsers/helpers/points';
 
 import { anyToString } from '../Item/MetadataTable';
 import { KanbanContext } from '../context';
 import { c, generateInstanceId } from '../helpers';
 import { EditState, Lane, LaneSort, LaneTemplate } from '../types';
-import { getNumericPointValue } from 'src/parsers/helpers/points';
 
 export type LaneAction = 'delete' | 'archive' | 'archive-items' | null;
 
@@ -289,53 +289,59 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
       }
 
       if (canSortPoints) {
+        const sortByPoints = (isAsc: boolean) => {
+          const children = lane.children.slice();
+
+          children.sort((a, b) => {
+            const valA = getNumericPointValue(a.data.metadata.points);
+            const valB = getNumericPointValue(b.data.metadata.points);
+
+            if (valA === null && valB === null) {
+              const hasA = a.data.metadata.points !== undefined && a.data.metadata.points !== '';
+              const hasB = b.data.metadata.points !== undefined && b.data.metadata.points !== '';
+              if (hasA && !hasB) return -1;
+              if (!hasA && hasB) return 1;
+              return 0;
+            }
+            if (valA === null) return 1;
+            if (valB === null) return -1;
+
+            if (isAsc) {
+              return valB - valA;
+            }
+            return valA - valB;
+          });
+
+          boardModifiers.updateLane(
+            path,
+            update(lane, {
+              children: {
+                $set: children,
+              },
+              data: {
+                sorted: {
+                  $set:
+                    lane.data.sorted === LaneSort.PointsAsc
+                      ? LaneSort.PointsDsc
+                      : LaneSort.PointsAsc,
+                },
+              },
+            })
+          );
+        };
+
         menu.addItem((item) => {
           item
             .setIcon('arrow-down-up')
-            .setTitle(t('Sort by points'))
-            .onClick(() => {
-              const children = lane.children.slice();
-              const isAsc = lane.data.sorted === LaneSort.PointsAsc;
+            .setTitle(t('Sort by points (Asc)'))
+            .onClick(() => sortByPoints(true));
+        });
 
-              children.sort((a, b) => {
-                const valA = getNumericPointValue(a.data.metadata.points);
-                const valB = getNumericPointValue(b.data.metadata.points);
-
-                if (valA === null && valB === null) {
-                  const hasA =
-                    a.data.metadata.points !== undefined && a.data.metadata.points !== '';
-                  const hasB =
-                    b.data.metadata.points !== undefined && b.data.metadata.points !== '';
-                  if (hasA && !hasB) return -1;
-                  if (!hasA && hasB) return 1;
-                  return 0;
-                }
-                if (valA === null) return 1;
-                if (valB === null) return -1;
-
-                if (isAsc) {
-                  return valB - valA;
-                }
-                return valA - valB;
-              });
-
-              boardModifiers.updateLane(
-                path,
-                update(lane, {
-                  children: {
-                    $set: children,
-                  },
-                  data: {
-                    sorted: {
-                      $set:
-                        lane.data.sorted === LaneSort.PointsAsc
-                          ? LaneSort.PointsDsc
-                          : LaneSort.PointsAsc,
-                    },
-                  },
-                })
-              );
-            });
+        menu.addItem((item) => {
+          item
+            .setIcon('arrow-down-up')
+            .setTitle(t('Sort by points (Desc)'))
+            .onClick(() => sortByPoints(false));
         });
       }
 

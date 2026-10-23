@@ -277,7 +277,8 @@ const en = {
 
   // Points / Planning Poker
   pts: 'pts',
-  'Sort by points': 'Sort by points',
+  'Sort by points (Asc)': 'Sort by points (Asc)',
+  'Sort by points (Desc)': 'Sort by points (Desc)',
   'Total story points': 'Total story points',
   'Add points': 'Add points',
   'Edit points': 'Edit points',
