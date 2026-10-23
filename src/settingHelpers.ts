@@ -9,6 +9,9 @@ import { t } from './lang/helpers';
 export const defaultDateTrigger = '@';
 export const defaultTimeTrigger = '@@';
 export const defaultMetadataPosition = 'body';
+export type PointsEngine = 'planning-poker' | 't-shirt' | 'fibonacci' | 'custom';
+export const defaultPointsEngine: PointsEngine = 'planning-poker';
+export const defaultCustomPoints = '1, 2, 3, 5, 8';
 
 export function getFolderChoices(app: App) {
   const folderList: IChoices.Choice[] = [];

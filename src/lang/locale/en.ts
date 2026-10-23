@@ -293,6 +293,17 @@ const en = {
   'Move points to card footer': 'Move points to card footer',
   'Display story points as a badge in the card footer instead of within the card title':
     'Display story points as a badge in the card footer instead of within the card title',
+  'Story Points': 'Story Points',
+  'Points engine': 'Points engine',
+  'Select the points estimation system for this board':
+    'Select the points estimation system for this board',
+  'Planning Poker': 'Planning Poker',
+  'T-shirt': 'T-shirt',
+  Fibonacci: 'Fibonacci',
+  Custom: 'Custom',
+  'Custom point values': 'Custom point values',
+  'Comma-separated list of point values (e.g. 1, 2, 3, 5, 8)':
+    'Comma-separated list of point values (e.g. 1, 2, 3, 5, 8)',
 };
 
 export type Lang = typeof en;

@@ -9,8 +9,10 @@ import {
   PLANNING_POKER_VALUES,
   TSHIRT_VALUES,
   formatPointDisplay,
+  getBoardPointOptions,
   setPointsInTitleRaw,
 } from 'src/parsers/helpers/points';
+import { PointsEngine, defaultPointsEngine } from 'src/settingHelpers';
 
 import { Icon } from '../Icon/Icon';
 import { KanbanContext } from '../context';
@@ -36,52 +38,20 @@ export function showPointsMenu({
   const currentPoints = item.data.metadata.points;
   const coordinates = { x: e.clientX, y: e.clientY };
   const menu = new Menu();
+  const pointsEngine = stateManager.getSetting('points-engine') || defaultPointsEngine;
+  const boardPointsOptions = getBoardPointOptions(stateManager);
 
-  // Planning Poker values
-  PLANNING_POKER_VALUES.forEach((val) => {
+  boardPointsOptions.forEach((val) => {
     menu.addItem((i) => {
-      i.setTitle(`${val} ${val === '?' ? '' : t('pts')}`.trim())
+      const title =
+        pointsEngine === 'planning-poker' ? `${val} ${val === '?' ? '' : t('pts')}`.trim() : val;
+      i.setTitle(title)
         .setChecked(currentPoints === val)
         .onClick(() => {
           const newTitleRaw = setPointsInTitleRaw(item.data.titleRaw, val);
           boardModifiers.updateItem(path, stateManager.updateItemContent(item, newTitleRaw));
         });
     });
-  });
-
-  menu.addSeparator();
-
-  // T-Shirt sizes submenu
-  menu.addItem((itemEl) => {
-    const submenu = (itemEl as any)
-      .setTitle(t('T-shirt sizes'))
-      .setIcon('lucide-tag')
-      .setSubmenu();
-
-    TSHIRT_VALUES.forEach((val) => {
-      submenu.addItem((i: any) => {
-        i.setTitle(val)
-          .setChecked(currentPoints === val)
-          .onClick(() => {
-            const newTitleRaw = setPointsInTitleRaw(item.data.titleRaw, val);
-            boardModifiers.updateItem(path, stateManager.updateItemContent(item, newTitleRaw));
-          });
-      });
-    });
-  });
-
-  // Custom value modal
-  menu.addItem((i) => {
-    i.setIcon('lucide-edit')
-      .setTitle(t('Custom points...'))
-      .onClick(() => {
-        new CustomPointsModal(stateManager.app, currentPoints ?? '', (customVal) => {
-          if (customVal) {
-            const newTitleRaw = setPointsInTitleRaw(item.data.titleRaw, customVal);
-            boardModifiers.updateItem(path, stateManager.updateItemContent(item, newTitleRaw));
-          }
-        }).open();
-      });
   });
 
   // Clear / remove points

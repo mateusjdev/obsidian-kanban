@@ -1,4 +1,6 @@
+import { StateManager } from 'src/StateManager';
 import { Lane } from 'src/components/types';
+import { defaultPointsEngine } from 'src/settingHelpers';
 
 export const PLANNING_POKER_VALUES = [
   '0',
@@ -17,6 +19,8 @@ export const PLANNING_POKER_VALUES = [
 
 export const TSHIRT_VALUES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;
 
+export const FIBONACCI_VALUES = ['1', '2', '3', '5', '8', '13', '21'] as const;
+
 export const TSHIRT_POINTS: Record<string, number> = {
   XS: 1,
   S: 2,
@@ -25,6 +29,31 @@ export const TSHIRT_POINTS: Record<string, number> = {
   XL: 8,
   XXL: 13,
 };
+
+export function getBoardPointOptions(stateManager: StateManager): string[] {
+  const engine = stateManager.getSetting('points-engine') || defaultPointsEngine;
+
+  switch (engine) {
+    case 't-shirt':
+      return [...TSHIRT_VALUES];
+    case 'fibonacci':
+      return [...FIBONACCI_VALUES];
+    case 'custom': {
+      const custom = stateManager.getSetting('custom-points-values');
+      if (typeof custom === 'string' && custom.trim()) {
+        const parts = custom
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (parts.length > 0) return parts;
+      }
+      return ['1', '2', '3', '5', '8'];
+    }
+    case 'planning-poker':
+    default:
+      return [...PLANNING_POKER_VALUES];
+  }
+}
 
 export const POINT_REGEX =
   /(?:\[|\()\s*(?:points?|story-points?|sp)\s*::\s*([^\])]+)\s*(?:\]|\))/i;

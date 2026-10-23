@@ -34,9 +34,12 @@ import { t } from './lang/helpers';
 import KanbanPlugin from './main';
 import { frontmatterKey } from './parsers/common';
 import {
+  PointsEngine,
   createSearchSelect,
+  defaultCustomPoints,
   defaultDateTrigger,
   defaultMetadataPosition,
+  defaultPointsEngine,
   defaultTimeTrigger,
   getListOptions,
 } from './settingHelpers';
@@ -77,6 +80,8 @@ export interface KanbanSettings {
   'new-line-trigger'?: 'enter' | 'shift-enter';
   'new-note-folder'?: string;
   'new-note-template'?: string;
+  'points-engine'?: PointsEngine;
+  'custom-points-values'?: string;
   'show-add-list'?: boolean;
   'show-archive-all'?: boolean;
   'show-board-settings'?: boolean;
@@ -127,6 +132,8 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'new-line-trigger',
   'new-note-folder',
   'new-note-template',
+  'points-engine',
+  'custom-points-values',
   'show-add-list',
   'show-archive-all',
   'show-board-settings',
@@ -633,48 +640,74 @@ export class SettingsManager {
       });
     });
 
-    contentEl.createEl('h4', { text: t('Date & Time') });
+    contentEl.createEl('h4', { text: t('Story Points') });
 
     new Setting(contentEl)
-      .setName(t('Move dates to card footer'))
-      .setDesc(
-        t("When toggled, dates will be displayed in the card's footer instead of the card's body.")
-      )
-      .then((setting) => {
-        let toggleComponent: ToggleComponent;
+      .setName(t('Points engine'))
+      .setDesc(t('Select the points estimation system for this board'))
+      .then((s) => {
+        let input: DropdownComponent;
 
-        setting
-          .addToggle((toggle) => {
-            toggleComponent = toggle;
+        s.addDropdown((dropdown) => {
+          input = dropdown;
 
-            const [value, globalValue] = this.getSetting('move-dates', local);
+          dropdown.addOption('planning-poker', t('Planning Poker'));
+          dropdown.addOption('t-shirt', t('T-shirt'));
+          dropdown.addOption('fibonacci', t('Fibonacci'));
+          dropdown.addOption('custom', t('Custom'));
 
-            if (value !== undefined) {
-              toggle.setValue(value as boolean);
-            } else if (globalValue !== undefined) {
-              toggle.setValue(globalValue as boolean);
-            }
+          const [value, globalValue] = this.getSetting('points-engine', local);
 
-            toggle.onChange((newValue) => {
+          dropdown.setValue((value as string) || (globalValue as string) || defaultPointsEngine);
+          dropdown.onChange((value: PointsEngine) => {
+            if (value) {
               this.applySettingsUpdate({
-                'move-dates': {
-                  $set: newValue,
+                'points-engine': {
+                  $set: value,
                 },
               });
-            });
-          })
-          .addExtraButton((b) => {
-            b.setIcon('lucide-rotate-ccw')
-              .setTooltip(t('Reset to default'))
-              .onClick(() => {
-                const [, globalValue] = this.getSetting('move-dates', local);
-                toggleComponent.setValue((globalValue as boolean) ?? true);
-
-                this.applySettingsUpdate({
-                  $unset: ['move-dates'],
-                });
+            } else {
+              this.applySettingsUpdate({
+                $unset: ['points-engine'],
               });
+            }
           });
+        }).addExtraButton((b) => {
+          b.setIcon('lucide-rotate-ccw')
+            .setTooltip(t('Reset to default'))
+            .onClick(() => {
+              const [, globalValue] = this.getSetting('points-engine', local);
+              input.setValue((globalValue as string) || defaultPointsEngine);
+
+              this.applySettingsUpdate({
+                $unset: ['points-engine'],
+              });
+            });
+        });
+      });
+
+    new Setting(contentEl)
+      .setName(t('Custom point values'))
+      .setDesc(t('Comma-separated list of point values (e.g. 1, 2, 3, 5, 8)'))
+      .addText((text) => {
+        const [value, globalValue] = this.getSetting('custom-points-values', local);
+
+        text.inputEl.placeholder = `${globalValue ? globalValue : defaultCustomPoints} (default)`;
+        text.inputEl.value = (value as string) || '';
+
+        text.onChange((val) => {
+          if (val) {
+            this.applySettingsUpdate({
+              'custom-points-values': {
+                $set: val.trim(),
+              },
+            });
+          } else {
+            this.applySettingsUpdate({
+              $unset: ['custom-points-values'],
+            });
+          }
+        });
       });
 
     new Setting(contentEl)
@@ -714,6 +747,50 @@ export class SettingsManager {
 
                 this.applySettingsUpdate({
                   $unset: ['move-points'],
+                });
+              });
+          });
+      });
+
+    contentEl.createEl('h4', { text: t('Date & Time') });
+
+    new Setting(contentEl)
+      .setName(t('Move dates to card footer'))
+      .setDesc(
+        t("When toggled, dates will be displayed in the card's footer instead of the card's body.")
+      )
+      .then((setting) => {
+        let toggleComponent: ToggleComponent;
+
+        setting
+          .addToggle((toggle) => {
+            toggleComponent = toggle;
+
+            const [value, globalValue] = this.getSetting('move-dates', local);
+
+            if (value !== undefined) {
+              toggle.setValue(value as boolean);
+            } else if (globalValue !== undefined) {
+              toggle.setValue(globalValue as boolean);
+            }
+
+            toggle.onChange((newValue) => {
+              this.applySettingsUpdate({
+                'move-dates': {
+                  $set: newValue,
+                },
+              });
+            });
+          })
+          .addExtraButton((b) => {
+            b.setIcon('lucide-rotate-ccw')
+              .setTooltip(t('Reset to default'))
+              .onClick(() => {
+                const [, globalValue] = this.getSetting('move-dates', local);
+                toggleComponent.setValue((globalValue as boolean) ?? true);
+
+                this.applySettingsUpdate({
+                  $unset: ['move-dates'],
                 });
               });
           });
