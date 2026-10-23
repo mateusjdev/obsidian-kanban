@@ -242,11 +242,14 @@ export class StateManager {
       'time-trigger': this.getSettingRaw('time-trigger', suppliedSettings) || defaultTimeTrigger,
       'link-date-to-daily-note': this.getSettingRaw('link-date-to-daily-note', suppliedSettings),
       'move-dates': this.getSettingRaw('move-dates', suppliedSettings),
+      'move-points': this.getSettingRaw('move-points', suppliedSettings) ?? true,
       'move-tags': this.getSettingRaw('move-tags', suppliedSettings),
       'move-task-metadata': this.getSettingRaw('move-task-metadata', suppliedSettings),
       'metadata-keys': metadataKeys,
       'archive-date-separator': this.getSettingRaw('archive-date-separator') || '',
       'archive-date-format': archiveDateFormat,
+      'show-lane-point-totals':
+        this.getSettingRaw('show-lane-point-totals', suppliedSettings) ?? true,
       'show-add-list': this.getSettingRaw('show-add-list', suppliedSettings) ?? true,
       'show-archive-all': this.getSettingRaw('show-archive-all', suppliedSettings) ?? true,
       'show-view-as-markdown':

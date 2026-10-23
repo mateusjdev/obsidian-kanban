@@ -31,6 +31,7 @@ import {
 } from '../helpers/ast';
 import { hydrateItem, preprocessTitle } from '../helpers/hydrateBoard';
 import { extractInlineFields, taskFields } from '../helpers/inlineMetadata';
+import { extractPoints, removePointsFromTitle } from '../helpers/points';
 import {
   addBlockId,
   dedentNewLines,
@@ -101,6 +102,7 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
       time: undefined,
       timeStr: undefined,
       tags: [],
+      points: undefined,
       fileAccessor: undefined,
       file: undefined,
       fileMetadata: undefined,
@@ -220,6 +222,18 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
 
       itemData.title = title;
     }
+  }
+
+  const points = extractPoints(itemContent);
+  if (points) {
+    itemData.metadata.points = points;
+    itemData.titleSearch += ` ${points} ${points}pts points: ${points}`;
+    itemData.titleSearchRaw += ` ${points} ${points}pts points: ${points}`;
+  }
+
+  const movePoints = stateManager.getSetting('move-points') ?? true;
+  if (movePoints) {
+    itemData.title = removePointsFromTitle(itemData.title);
   }
 
   itemData.metadata.tags?.sort(defaultSort);

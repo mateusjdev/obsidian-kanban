@@ -11,6 +11,8 @@ export enum LaneSort {
   DateDsc,
   TagsAsc,
   TagsDsc,
+  PointsAsc,
+  PointsDsc,
 }
 
 export interface LaneData {
@@ -70,6 +72,7 @@ export interface ItemMetadata {
   timeStr?: string;
   time?: moment.Moment;
   tags?: string[];
+  points?: string;
   fileAccessor?: FileAccessor;
   file?: TFile | null;
   fileMetadata?: FileMetadata;

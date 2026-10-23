@@ -7,7 +7,9 @@ import { MarkdownEditor, allowNewLine } from '../Editor/MarkdownEditor';
 import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer';
 import { KanbanContext } from '../context';
 import { c } from '../helpers';
-import { EditState, EditingState, isEditing } from '../types';
+import { EditState, EditingState, Lane, isEditing } from '../types';
+import { t } from 'src/lang/helpers';
+import { calculateLanePoints, laneHasPoints } from 'src/parsers/helpers/points';
 
 export interface LaneTitleProps {
   title: string;
@@ -48,6 +50,31 @@ export function LaneLimitCounter({
           <span className={c('lane-title-count-limit')}>{maxItems}</span>
         </>
       )}
+    </div>
+  );
+}
+
+export function LanePointsCounter({
+  lane,
+  editState,
+}: {
+  lane: Lane;
+  editState: EditState;
+}) {
+  const { stateManager } = useContext(KanbanContext);
+  const showPoints = stateManager.useSetting('show-lane-point-totals') ?? true;
+
+  if (!showPoints || isEditing(editState) || !laneHasPoints(lane)) return null;
+
+  const totalPoints = calculateLanePoints(lane);
+
+  return (
+    <div
+      className={c('lane-title-points')}
+      title={t('Total story points')}
+      aria-label={t('Total story points')}
+    >
+      {totalPoints} {t('pts')}
     </div>
   );
 }

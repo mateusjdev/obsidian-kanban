@@ -14,7 +14,7 @@ import { c } from '../helpers';
 import { EditState, EditingState, Lane, isEditing } from '../types';
 import { ConfirmAction, useSettingsMenu } from './LaneMenu';
 import { LaneSettings } from './LaneSettings';
-import { LaneLimitCounter, LaneTitle } from './LaneTitle';
+import { LaneLimitCounter, LanePointsCounter, LaneTitle } from './LaneTitle';
 
 interface LaneHeaderProps {
   lane: Lane;
@@ -156,6 +156,8 @@ export const LaneHeader = memo(function LaneHeader({
           itemCount={lane.children.length}
           maxItems={lane.data.maxItems}
         />
+
+        <LanePointsCounter editState={editState} lane={lane} />
 
         <LaneButtons
           editState={editState}

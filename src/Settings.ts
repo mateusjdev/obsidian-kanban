@@ -70,6 +70,7 @@ export interface KanbanSettings {
   'max-archive-size'?: number;
   'metadata-keys'?: DataKey[];
   'move-dates'?: boolean;
+  'move-points'?: boolean;
   'move-tags'?: boolean;
   'move-task-metadata'?: boolean;
   'new-card-insertion-method'?: 'prepend' | 'prepend-compact' | 'append';
@@ -80,6 +81,7 @@ export interface KanbanSettings {
   'show-archive-all'?: boolean;
   'show-board-settings'?: boolean;
   'show-checkboxes'?: boolean;
+  'show-lane-point-totals'?: boolean;
   'show-relative-date'?: boolean;
   'show-search'?: boolean;
   'show-set-view'?: boolean;
@@ -118,6 +120,7 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'max-archive-size',
   'metadata-keys',
   'move-dates',
+  'move-points',
   'move-tags',
   'move-task-metadata',
   'new-card-insertion-method',
@@ -128,6 +131,7 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'show-archive-all',
   'show-board-settings',
   'show-checkboxes',
+  'show-lane-point-totals',
   'show-relative-date',
   'show-search',
   'show-set-view',
@@ -327,6 +331,46 @@ export class SettingsManager {
 
                 this.applySettingsUpdate({
                   $unset: ['hide-card-count'],
+                });
+              });
+          });
+      });
+
+    new Setting(contentEl)
+      .setName(t('Show points in list titles'))
+      .setDesc(t('When toggled, total story points are displayed in the list title'))
+      .then((setting) => {
+        let toggleComponent: ToggleComponent;
+
+        setting
+          .addToggle((toggle) => {
+            toggleComponent = toggle;
+
+            const [value, globalValue] = this.getSetting('show-lane-point-totals', local);
+
+            if (value !== undefined) {
+              toggle.setValue(value as boolean);
+            } else if (globalValue !== undefined) {
+              toggle.setValue(globalValue as boolean);
+            }
+
+            toggle.onChange((newValue) => {
+              this.applySettingsUpdate({
+                'show-lane-point-totals': {
+                  $set: newValue,
+                },
+              });
+            });
+          })
+          .addExtraButton((b) => {
+            b.setIcon('lucide-rotate-ccw')
+              .setTooltip(t('Reset to default'))
+              .onClick(() => {
+                const [, globalValue] = this.getSetting('show-lane-point-totals', local);
+                toggleComponent.setValue((globalValue as boolean) ?? true);
+
+                this.applySettingsUpdate({
+                  $unset: ['show-lane-point-totals'],
                 });
               });
           });
@@ -628,6 +672,48 @@ export class SettingsManager {
 
                 this.applySettingsUpdate({
                   $unset: ['move-dates'],
+                });
+              });
+          });
+      });
+
+    new Setting(contentEl)
+      .setName(t('Move points to card footer'))
+      .setDesc(
+        t('Display story points as a badge in the card footer instead of within the card title')
+      )
+      .then((setting) => {
+        let toggleComponent: ToggleComponent;
+
+        setting
+          .addToggle((toggle) => {
+            toggleComponent = toggle;
+
+            const [value, globalValue] = this.getSetting('move-points', local);
+
+            if (value !== undefined) {
+              toggle.setValue(value as boolean);
+            } else if (globalValue !== undefined) {
+              toggle.setValue(globalValue as boolean);
+            }
+
+            toggle.onChange((newValue) => {
+              this.applySettingsUpdate({
+                'move-points': {
+                  $set: newValue,
+                },
+              });
+            });
+          })
+          .addExtraButton((b) => {
+            b.setIcon('lucide-rotate-ccw')
+              .setTooltip(t('Reset to default'))
+              .onClick(() => {
+                const [, globalValue] = this.getSetting('move-points', local);
+                toggleComponent.setValue((globalValue as boolean) ?? true);
+
+                this.applySettingsUpdate({
+                  $unset: ['move-points'],
                 });
               });
           });

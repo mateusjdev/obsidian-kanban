@@ -36,6 +36,7 @@ export function InlineMetadata({ item, stateManager }: InlineMetadataProps) {
         const { metadataKey: key, value, label: explicitLabel } = data;
         const isTaskMetadata = taskFields.has(key);
 
+        if (/^(?:points?|story-points?|sp)$/i.test(key)) return null;
         if (!showTaskMetadata && isTaskMetadata) return null;
         if (!showInlineMetadata && !isTaskMetadata) return null;
 

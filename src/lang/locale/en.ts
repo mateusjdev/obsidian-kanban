@@ -274,6 +274,25 @@ const en = {
 
   // components/Editor/MarkdownEditor.tsx
   Submit: 'Submit',
+
+  // Points / Planning Poker
+  pts: 'pts',
+  'Sort by points': 'Sort by points',
+  'Total story points': 'Total story points',
+  'Add points': 'Add points',
+  'Edit points': 'Edit points',
+  'Remove points': 'Remove points',
+  'T-shirt sizes': 'T-shirt sizes',
+  'Custom points...': 'Custom points...',
+  'Enter custom points': 'Enter custom points',
+  'Set points': 'Set points',
+  Points: 'Points',
+  'Show points in list titles': 'Show points in list titles',
+  'When toggled, total story points are displayed in the list title':
+    'When toggled, total story points are displayed in the list title',
+  'Move points to card footer': 'Move points to card footer',
+  'Display story points as a badge in the card footer instead of within the card title':
+    'Display story points as a badge in the card footer instead of within the card title',
 };
 
 export type Lang = typeof en;

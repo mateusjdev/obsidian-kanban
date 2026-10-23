@@ -10,6 +10,7 @@ import { anyToString } from '../Item/MetadataTable';
 import { KanbanContext } from '../context';
 import { c, generateInstanceId } from '../helpers';
 import { EditState, Lane, LaneSort, LaneTemplate } from '../types';
+import { getNumericPointValue } from 'src/parsers/helpers/points';
 
 export type LaneAction = 'delete' | 'archive' | 'archive-items' | null;
 
@@ -74,6 +75,7 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
     const metadataSortOptions = new Set<string>();
     let canSortDate = false;
     let canSortTags = false;
+    let canSortPoints = false;
 
     lane.children.forEach((item) => {
       const taskData = item.data.metadata.inlineMetadata;
@@ -86,6 +88,12 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
 
       if (!canSortDate && item.data.metadata.date) canSortDate = true;
       if (!canSortTags && item.data.metadata.tags?.length) canSortTags = true;
+      if (
+        !canSortPoints &&
+        item.data.metadata.points !== undefined &&
+        item.data.metadata.points !== ''
+      )
+        canSortPoints = true;
     });
 
     const menu = new Menu()
@@ -272,6 +280,57 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
                     sorted: {
                       $set:
                         lane.data.sorted === LaneSort.TagsAsc ? LaneSort.TagsDsc : LaneSort.TagsAsc,
+                    },
+                  },
+                })
+              );
+            });
+        });
+      }
+
+      if (canSortPoints) {
+        menu.addItem((item) => {
+          item
+            .setIcon('arrow-down-up')
+            .setTitle(t('Sort by points'))
+            .onClick(() => {
+              const children = lane.children.slice();
+              const isAsc = lane.data.sorted === LaneSort.PointsAsc;
+
+              children.sort((a, b) => {
+                const valA = getNumericPointValue(a.data.metadata.points);
+                const valB = getNumericPointValue(b.data.metadata.points);
+
+                if (valA === null && valB === null) {
+                  const hasA =
+                    a.data.metadata.points !== undefined && a.data.metadata.points !== '';
+                  const hasB =
+                    b.data.metadata.points !== undefined && b.data.metadata.points !== '';
+                  if (hasA && !hasB) return -1;
+                  if (!hasA && hasB) return 1;
+                  return 0;
+                }
+                if (valA === null) return 1;
+                if (valB === null) return -1;
+
+                if (isAsc) {
+                  return valB - valA;
+                }
+                return valA - valB;
+              });
+
+              boardModifiers.updateLane(
+                path,
+                update(lane, {
+                  children: {
+                    $set: children,
+                  },
+                  data: {
+                    sorted: {
+                      $set:
+                        lane.data.sorted === LaneSort.PointsAsc
+                          ? LaneSort.PointsDsc
+                          : LaneSort.PointsAsc,
                     },
                   },
                 })

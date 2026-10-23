@@ -68,6 +68,12 @@ export function getSearchValue(item: Item, stateManager: StateManager) {
     searchValue.push(anyToString(item.data.metadata.date, stateManager));
   }
 
+  if (item.data.metadata.points) {
+    searchValue.push(item.data.metadata.points);
+    searchValue.push(`${item.data.metadata.points}pts`);
+    searchValue.push(`points: ${item.data.metadata.points}`);
+  }
+
   return searchValue.join(' ').toLocaleLowerCase();
 }
 

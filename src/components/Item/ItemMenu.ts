@@ -15,6 +15,8 @@ import {
   constructMenuTimePickerOnChange,
   constructTimePicker,
 } from './helpers';
+import { showPointsMenu } from './ItemPoints';
+import { setPointsInTitleRaw } from 'src/parsers/helpers/points';
 
 const illegalCharsRegEx = /[\\/:"*?<>|]+/g;
 const embedRegEx = /!?\[\[([^\]]*)\.[^\]]+\]\]/g;
@@ -261,6 +263,32 @@ export function useItemMenu({
               });
           });
         }
+      }
+
+      menu
+        .addItem((i) => {
+          i.setIcon('lucide-circle-dot')
+            .setTitle(item.data.metadata.points !== undefined ? t('Edit points') : t('Add points'))
+            .onClick(() => {
+              showPointsMenu({
+                e,
+                stateManager,
+                boardModifiers,
+                item,
+                path,
+              });
+            });
+        });
+
+      if (item.data.metadata.points !== undefined && item.data.metadata.points !== '') {
+        menu.addItem((i) => {
+          i.setIcon('lucide-x')
+            .setTitle(t('Remove points'))
+            .onClick(() => {
+              const newTitleRaw = setPointsInTitleRaw(item.data.titleRaw, undefined);
+              boardModifiers.updateItem(path, stateManager.updateItemContent(item, newTitleRaw));
+            });
+        });
       }
 
       menu.addSeparator();

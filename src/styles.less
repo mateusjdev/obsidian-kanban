@@ -423,6 +423,7 @@ button.kanban-plugin__lane-action-add {
   }
 
   .kanban-plugin__lane-title-count,
+  .kanban-plugin__lane-title-points,
   .kanban-plugin__lane-title-text {
     transform: rotate(180deg);
   }
@@ -497,6 +498,18 @@ div.kanban-plugin__lane-title-count.wip-exceeded {
   font-weight: bold;
   color: var(--text-normal);
   background-color: rgba(var(--background-modifier-error-rgb), 0.25);
+}
+
+div.kanban-plugin__lane-title-points {
+  border-radius: 3px;
+  color: var(--text-muted);
+  display: block;
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px;
+  background-color: var(--background-secondary);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .kanban-plugin__table-cell-wrapper .kanban-plugin__lane-menu,
@@ -815,8 +828,9 @@ button.kanban-plugin__new-item-button {
 .kanban-plugin__item-metadata > span {
   display: block;
 
-  &.kanban-plugin__item-metadata-date-wrapper {
-    display: inline-block;
+  &.kanban-plugin__item-metadata-date-wrapper,
+  &.kanban-plugin__item-points-badge {
+    display: inline-flex;
   }
 }
 
@@ -862,6 +876,46 @@ button.kanban-plugin__new-item-button {
 .kanban-plugin__item-tag {
   display: inline-block;
   margin-inline-end: 4px;
+}
+
+.kanban-plugin__item-points-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  padding: 1px 6px;
+  border-radius: var(--radius-s);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  line-height: 1.4;
+  margin-inline-end: 4px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: var(--background-modifier-hover);
+    border-color: var(--interactive-accent);
+    color: var(--text-accent);
+
+    .kanban-plugin__item-points-badge-icon {
+      color: var(--text-accent);
+    }
+  }
+
+  .kanban-plugin__item-points-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-muted);
+
+    svg {
+      width: 11px;
+      height: 11px;
+    }
+  }
 }
 
 .kanban-plugin__item-tags .kanban-plugin__item-tag {
